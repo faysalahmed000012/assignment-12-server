@@ -20,6 +20,12 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+
+    const productCollection = client.db("electrofirm").collection("products");
+    app.get("/products", async (req, res) => {
+      const products = await productCollection.find().toArray();
+      res.send(products);
+    });
   } finally {
   }
 }
