@@ -39,6 +39,7 @@ async function run() {
     const productCollection = client.db("electrofirm").collection("products");
     const OrderCollection = client.db("electrofirm").collection("orders");
     const userCollection = client.db("electrofirm").collection("users");
+    const reviewCollection = client.db("electrofirm").collection("reviews");
 
     // get products
     app.get("/products", async (req, res) => {
@@ -70,10 +71,17 @@ async function run() {
 
     // get order by user
 
-    app.get("/order/:email", async (req, res) => {
+    app.get("/orders/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
-      const result = await OrderCollection.find(query);
+      const result = await OrderCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete("/order/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await OrderCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -98,6 +106,14 @@ async function run() {
     app.get("/users", verifyJWT, async (req, res) => {
       const users = await userCollection.find().toArray();
       res.send(users);
+    });
+
+    // add a review
+
+    app.post("/reviews", verifyJWT, async (req, res) => {
+      const data = req.body;
+      const review = await reviewCollection.insertOne(data);
+      res.send(review);
     });
   } finally {
   }
