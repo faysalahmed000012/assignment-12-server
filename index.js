@@ -22,6 +22,8 @@ async function run() {
     await client.connect();
 
     const productCollection = client.db("electrofirm").collection("products");
+    const OrderCollection = client.db("electrofirm").collection("orders");
+
     app.get("/products", async (req, res) => {
       const products = await productCollection.find().toArray();
       res.send(products);
@@ -34,6 +36,12 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const product = await productCollection.findOne(query);
       res.send(product);
+    });
+
+    app.post("/orders", async (req, res) => {
+      const order = req.body;
+      const result = await OrderCollection.insertOne(order);
+      res.send(result);
     });
   } finally {
   }
