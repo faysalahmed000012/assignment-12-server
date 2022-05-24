@@ -55,12 +55,20 @@ async function run() {
       const product = await productCollection.findOne(query);
       res.send(product);
     });
-
+    // delete product by id
     app.delete("/product/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = productCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // add product
+
+    app.post("/products", verifyJWT, async (req, res) => {
+      const body = req.body;
+      const product = await productCollection.insertOne(body);
+      res.send(product);
     });
 
     // post order
