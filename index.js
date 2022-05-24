@@ -40,6 +40,7 @@ async function run() {
     const OrderCollection = client.db("electrofirm").collection("orders");
     const userCollection = client.db("electrofirm").collection("users");
 
+    // get products
     app.get("/products", async (req, res) => {
       const products = await productCollection.find().toArray();
       res.send(products);
@@ -47,19 +48,27 @@ async function run() {
 
     // load single product
 
-    app.get("/product/:id", async (req, res) => {
+    app.get("/product/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const product = await productCollection.findOne(query);
       res.send(product);
     });
 
+    // post order
     app.post("/orders", async (req, res) => {
       const order = req.body;
       const result = await OrderCollection.insertOne(order);
       res.send(result);
     });
 
+    // get all orders
+    app.get("/orders", verifyJWT, async (req, res) => {
+      const orders = await OrderCollection.find().toArray();
+      res.send(orders);
+    });
+
+    // put user
     app.put("/users/:email", async (req, res) => {
       const email = req.params.email;
       const user = req.body;
@@ -74,6 +83,12 @@ async function run() {
         expiresIn: "2d",
       });
       res.send({ result, token });
+    });
+
+    // get all users
+    app.get("/users", verifyJWT, async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
     });
   } finally {
   }
