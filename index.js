@@ -257,6 +257,11 @@ async function run() {
       const review = await reviewCollection.insertOne(data);
       res.send(review);
     });
+
+    app.get("/reviews", async (req, res) => {
+      const reviews = await reviewCollection.find().toArray();
+      res.send(reviews);
+    });
   } finally {
   }
 }
