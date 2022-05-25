@@ -3,6 +3,7 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 const app = express();
@@ -40,6 +41,7 @@ async function run() {
     const OrderCollection = client.db("electrofirm").collection("orders");
     const userCollection = client.db("electrofirm").collection("users");
     const reviewCollection = client.db("electrofirm").collection("reviews");
+    const paymentCollection = client.db("electrofirm").collection("payments");
 
     // verifyadmin
     const verifyADMIN = async (req, res, next) => {
@@ -76,6 +78,62 @@ async function run() {
       res.send(result);
     });
 
+    // payment
+
+    app.post("/create-payment-intent", verifyJWT, async (req, res) => {
+      const order = req.body;
+      const price = order.price;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
+    // save payment
+
+    app.put("/order/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: "paid",
+          transactionId: payment.transactionId,
+        },
+      };
+      const result = await paymentCollection.insertOne(payment);
+      const updatedOrder = await OrderCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+
+      res.send(updateDoc);
+    });
+
+    app.put("/order/paid/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: "shipped",
+        },
+      };
+      const result = await OrderCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
     // add product
 
     app.post("/products", verifyJWT, async (req, res) => {
@@ -106,6 +164,16 @@ async function run() {
       res.send(result);
     });
 
+    // get order by id
+
+    app.get("/order/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await OrderCollection.findOne(query);
+      res.send(result);
+    });
+
+    // delete order
     app.delete("/order/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -130,6 +198,30 @@ async function run() {
       res.send({ result, token });
     });
 
+    app.get("/user/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      res.send(user);
+    });
+
+    app.put("/user/update/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const updateDoc = {
+        $set: {
+          education: user.education,
+          location: user.location,
+          phone: user.phone,
+          linkedIn: user.linkedIn,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+
+      return res.send(result);
+    });
+
     // get all users
     app.get("/users", verifyJWT, async (req, res) => {
       const users = await userCollection.find().toArray();
@@ -146,7 +238,7 @@ async function run() {
 
     // make admin
 
-    app.put("/users/admin/:email", verifyJWT, async (req, res) => {
+    app.put("/users/admin/:email", verifyJWT, verifyADMIN, async (req, res) => {
       const email = req.params.email;
 
       const filter = { email: email };
