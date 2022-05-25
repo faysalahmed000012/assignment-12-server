@@ -41,6 +41,19 @@ async function run() {
     const userCollection = client.db("electrofirm").collection("users");
     const reviewCollection = client.db("electrofirm").collection("reviews");
 
+    // verifyadmin
+    const verifyADMIN = async (req, res, next) => {
+      const register = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({
+        email: register,
+      });
+      if (requesterAccount.role === "admin") {
+        next();
+      } else {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+    };
+
     // get products
     app.get("/products", async (req, res) => {
       const products = await productCollection.find().toArray();
@@ -121,6 +134,28 @@ async function run() {
     app.get("/users", verifyJWT, async (req, res) => {
       const users = await userCollection.find().toArray();
       res.send(users);
+    });
+
+    // get admin
+    app.get("/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({ email: email });
+      const isAdmin = user?.role === "admin";
+      res.send({ admin: isAdmin });
+    });
+
+    // make admin
+
+    app.put("/users/admin/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+
+      const filter = { email: email };
+      const updateDoc = {
+        $set: { role: "admin" },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+
+      return res.send(result);
     });
 
     // add a review
