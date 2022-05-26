@@ -78,6 +78,25 @@ async function run() {
       res.send(result);
     });
 
+    // update a product
+    app.put("/product/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const newQuantity = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          availableQuantity: newQuantity.newQuantity,
+        },
+      };
+      const result = await productCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
     // payment
 
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
@@ -116,7 +135,7 @@ async function run() {
 
       res.send(updateDoc);
     });
-
+    // paid order
     app.put("/order/paid/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
