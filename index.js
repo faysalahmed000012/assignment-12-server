@@ -33,6 +33,12 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+function call() {
+  // i made a new change
+  return "funny";
+}
+
 async function run() {
   try {
     await client.connect();
