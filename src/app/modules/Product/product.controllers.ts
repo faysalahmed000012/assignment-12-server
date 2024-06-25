@@ -87,9 +87,26 @@ const updateProduct = catchAsync(async (req, res) => {
   });
 });
 
+// app.post("/products", verifyJWT, verifyADMIN, async (req, res) => {
+//   const body = req.body;
+//   const product = await productCollection.insertOne(body);
+//   res.send(product);
+// });
+
+const addProduct = catchAsync(async (req, res) => {
+  const payload = req.body;
+  const result = await ProductServices.addProduct(payload);
+  res.status(201).json({
+    success: true,
+    message: "Product Updated Successfully",
+    data: result,
+  });
+});
+
 export const ProductControllers = {
   getProducts,
   getProductById,
   deleteProduct,
   updateProduct,
+  addProduct,
 };
