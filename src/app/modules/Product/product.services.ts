@@ -36,9 +36,15 @@ const updateProduct = async (id: string, payload: Partial<IProduct>) => {
   return result;
 };
 
+const addProduct = async (payload: IProduct) => {
+  const product = await Product.create(payload);
+  return product;
+};
+
 export const ProductServices = {
   getAllProducts,
   getProductById,
   updateProduct,
   deleteProduct,
+  addProduct,
 };

@@ -1,6 +1,7 @@
-import { Schema } from "mongoose";
+import { model, Schema } from "mongoose";
+import IReview from "./review.interface";
 
-const ReviewSchema = new Schema({
+const ReviewSchema = new Schema<IReview>({
   name: {
     type: String,
     required: true,
@@ -22,3 +23,5 @@ const ReviewSchema = new Schema({
     required: true,
   },
 });
+
+export const Review = model<IReview>("reviews", ReviewSchema);
