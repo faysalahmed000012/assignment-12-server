@@ -4,7 +4,7 @@ import AppError from "../errors/AppError";
 import { User } from "../modules/User/user.model";
 import catchAsync from "../utils/catchAsync";
 
-export default function auth(...requiredRoles: []) {
+export default function auth(...requiredRoles: string[]) {
   return catchAsync(async (req, res, next) => {
     const token = req.headers.authorization;
 
@@ -17,7 +17,7 @@ export default function auth(...requiredRoles: []) {
       config.jwt_access_secret as string
     ) as JwtPayload;
 
-    const { role, email, iat } = decoded;
+    const { role, email } = decoded;
 
     const user = User.findOne({ email });
     if (!user) {

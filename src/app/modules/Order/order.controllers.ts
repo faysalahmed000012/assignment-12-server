@@ -50,10 +50,22 @@ const cancelOrder = catchAsync(async (req, res) => {
   });
 });
 
+const paidOrder = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const result = await OrderServices.paidOrder(id);
+
+  res.status(200).json({
+    success: true,
+    message: "Successfully added paid order",
+    data: result,
+  });
+});
+
 export const OrderControllers = {
   getAllOrders,
   getOrderById,
   getOrderByUser,
   createOrder,
   cancelOrder,
+  paidOrder,
 };

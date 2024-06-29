@@ -6,6 +6,7 @@ import { OrderControllers } from "./order.controllers";
 const router = Router();
 
 router.get("/", auth(USER_ROLE.admin), OrderControllers.getAllOrders);
+router.put("/paid/:id", auth(USER_ROLE.admin), OrderControllers.paidOrder);
 router.get(
   "/:email",
   auth(USER_ROLE.admin, USER_ROLE.user),

@@ -1,5 +1,8 @@
+import Stripe from "stripe";
+import config from "../../config";
 import IOrder from "./order.interface";
 import { Order } from "./order.model";
+const stripe = new Stripe(config.stripe_secret_key as string);
 
 // post order
 const createOrder = async (payload: IOrder) => {
@@ -37,10 +40,34 @@ const cancelOrder = async (id: string) => {
   return result;
 };
 
+const paidOrder = async (id: string) => {
+  const updateDoc = {
+    $set: {
+      status: "confirmed",
+    },
+  };
+  const result = await Order.findOneAndUpdate({ _id: id }, updateDoc, {
+    new: true,
+  });
+  return result;
+};
+
+const paymentInterest = async (payload: any) => {
+  const amount = Number(payload.price * 100); // calculating in cents
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount,
+    currency: "usd",
+    payment_method_types: ["card"],
+  });
+
+  return paymentIntent;
+};
+
 export const OrderServices = {
   createOrder,
   getAllOrders,
   getOrdersByUser,
   getOrderById,
   cancelOrder,
+  paidOrder,
 };
