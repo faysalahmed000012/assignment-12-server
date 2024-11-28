@@ -13,7 +13,15 @@ router.get(
   OrderControllers.getOrderByUser
 );
 router.get("/order/:id", auth(USER_ROLE.admin), OrderControllers.getOrderById);
-router.post("/", auth(USER_ROLE.user), OrderControllers.createOrder);
-router.delete("/:id", auth(USER_ROLE.user), OrderControllers.cancelOrder);
+router.post(
+  "/",
+  auth(USER_ROLE.user, USER_ROLE.admin),
+  OrderControllers.createOrder
+);
+router.delete(
+  "/:id",
+  auth(USER_ROLE.user, USER_ROLE.admin),
+  OrderControllers.cancelOrder
+);
 
 export const OrderRoutes = router;

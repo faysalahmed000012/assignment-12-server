@@ -8,7 +8,7 @@ const router = Router();
 router.get("/", ProductControllers.getProducts);
 router.get("/:id", ProductControllers.getProductById);
 router.delete("/:id", auth(USER_ROLE.admin), ProductControllers.deleteProduct);
-router.patch("/:id", auth(USER_ROLE.admin), ProductControllers.updateProduct);
+router.put("/:id", auth(USER_ROLE.admin), ProductControllers.updateProduct);
 router.post("/", auth(USER_ROLE.admin), ProductControllers.addProduct);
 
 export const ProductRoutes = router;

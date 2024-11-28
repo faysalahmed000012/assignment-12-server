@@ -13,7 +13,7 @@ export default function auth(...requiredRoles: string[]) {
     }
 
     const decoded = jwt.verify(
-      token,
+      token.split(" ")[1],
       config.jwt_access_secret as string
     ) as JwtPayload;
 

@@ -8,9 +8,10 @@ import router from "./app/routes";
 const app: Application = express();
 
 // parsers
+
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("🤗 Welcome to Version 2");

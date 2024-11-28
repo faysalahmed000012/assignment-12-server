@@ -3,7 +3,7 @@ import { ProductServices } from "./product.services";
 
 const getProducts = catchAsync(async (req, res) => {
   const products = await ProductServices.getAllProducts();
-  if (!products) {
+  if (products?.length === 0) {
     res.status(400).json({
       success: false,
       message: "Products Not Found",
